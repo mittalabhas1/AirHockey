@@ -35,7 +35,8 @@ var ball = {
     x: 500,
     y: 250,
     radius: radius.ball,
-    speed: 50,
+    speed_x: 40,
+    speed_y: 30,
     color: '#333'
 };
 
@@ -140,24 +141,43 @@ function coordinates(event){
 	moveBall(distance, slope, mousePos);
 }
 
-function moveBall(slope) {
+function moveBall(slope, number) {
 	erase();
-	displacement = ball.speed * 0.1;
-	if (slope <= 0) {
-		ball.x = ball.x + displacement*Math.cos(Math.atan(slope));
-		ball.y = ball.y + displacement*Math.sin(Math.atan(slope));
-	} else {
-		ball.x = ball.x - displacement*Math.cos(Math.atan(slope));
-		ball.y = ball.y - displacement*Math.sin(Math.atan(slope));
+	displacement_x = ball.speed_x * 0.1;
+	displacement_y = ball.speed_y * 0.1;
+	if (slope <= 0 && players[number-1].x < ball.x) {
+		console.log(1);
+		ball.x = ball.x + displacement_x*Math.cos(Math.atan(slope));
+		ball.y = ball.y - displacement_y*Math.sin(Math.atan(slope));
+	} else if (slope <= 0 && players[number-1].x > ball.x) {
+		console.log(2);
+		ball.x = ball.x - displacement_x*Math.cos(Math.atan(slope));
+		ball.y = ball.y + displacement_y*Math.sin(Math.atan(slope));
+	} else if (slope > 0 && players[number-1].x < ball.x) {
+		console.log(3);
+		ball.x = ball.x + displacement_x*Math.cos(Math.atan(slope));
+		ball.y = ball.y + displacement_y*Math.sin(Math.atan(slope));
+	} else if (slope > 0 && players[number-1].x > ball.x) {
+		console.log(4);
+		ball.x = ball.x - displacement_x*Math.cos(Math.atan(slope));
+		ball.y = ball.y - displacement_y*Math.sin(Math.atan(slope));
 	}
+	checkBoundariesForBall();
 	// console.log(ball.x+", "+ball.y+", "+distance);
 	render();
 	// distance -= displacement;
 	// if(distance > 0){
 		setTimeout(function(){
-			moveBall(slope)
+			moveBall(slope, number)
 		}, 10);
 	// }
+}
+
+function checkBoundariesForBall() {
+	if(ball.x > c.width || ball.x < 0)
+		ball.speed_x = -ball.speed_x;
+	if(ball.y > c.height || ball.y < 0)
+		ball.speed_y = -ball.speed_y;
 }
 
 function movePlayer(event, number) {
@@ -173,9 +193,9 @@ function movePlayer(event, number) {
 }
 
 function checkAngle(number) {
-	y = (players[number-1].y - ball.y);
-	x = (players[number-1].x - ball.x);
-	slope = x/y;
+	y = (ball.y - players[number-1].y);
+	x = (ball.y - players[number-1].x);
+	slope = y/x;
 	// console.log(-slope);
 	return slope;
 }
@@ -186,6 +206,6 @@ function checkHit(number) {
 	if(distance + radius.offSet >= players[number-1].radius + ball.radius && distance - radius.offSet <= players[number-1].radius + ball.radius){
 		// console.log("yes!!");
 		var slope = checkAngle(number);
-		moveBall(slope);
+		moveBall(slope, number);
 	}
 }
