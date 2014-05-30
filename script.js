@@ -25,43 +25,44 @@
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 
+var radius = {
+	players: 30,
+	ball: 20,
+	offSet: 1
+};
 
 var ball = {
     x: 500,
     y: 250,
-    radius: 20,
+    radius: radius.ball,
     speed: 50,
     color: '#333'
 };
 
-var player = {
-	radius: 30
-}
-
 var player1 = {
     x: 50,
     y: 250,
-    radius: player.radius,
+    radius: radius.players,
     color: '#f00',
-    max_x: c.width/2 - player.radius,
-    min_x: player.radius,
-    max_y: c.height - player.radius,
-    min_y: player.radius
+    max_x: c.width/2 - radius.players,
+    min_x: radius.players,
+    max_y: c.height - radius.players,
+    min_y: radius.players
 };
 
 var player2 = {
     x: 950,
     y: 250,
-    radius: player.radius,
+    radius: radius.players,
     color: '#00f',
-    max_x: c.width - player.radius,
-    min_x: c.width/2 + player.radius,
-    max_y: c.height - player.radius,
-    min_y: player.radius
+    max_x: c.width - radius.players,
+    min_x: c.width/2 + radius.players,
+    max_y: c.height - radius.players,
+    min_y: radius.players
 };
 
 var bg = {
-	color: "white"
+	color: "green"
 };
 
 var players = [];
@@ -73,7 +74,7 @@ render();
 function render() {
 
 	// making the center line
-	ctx.fillStyle = '#FFF';
+	ctx.fillStyle = bg.color;
     ctx.fillRect(0, 0, c.width, c.height);
     ctx.moveTo(500,0);
 	ctx.lineTo(500,500);
@@ -90,25 +91,18 @@ function render() {
 	//player1
 	ctx.beginPath();
 	ctx.arc(player1.x,player1.y,player1.radius,0,2*Math.PI);
+	ctx.fillStyle = player1.color;
+	ctx.fill();
 	ctx.strokeStyle = player1.color;
 	ctx.stroke();
 
 	//player2
 	ctx.beginPath();
 	ctx.arc(player2.x,player2.y,player2.radius,0,2*Math.PI);
+	ctx.fillStyle = player2.color;
+	ctx.fill();
 	ctx.strokeStyle = player2.color;
 	ctx.stroke();
-}
-
-function coordinates(event){
-	var mousePos = getMousePos(c, event);
-	// console.log(mousePos.x+", "+mousePos.y);
-	y = mousePos.y - ball.y;
-	x = mousePos.x - ball.x;
-	slope = y/x;
-	console.log(slope);
-	distance = Math.sqrt(Math.pow(y, 2) + Math.pow(x, 2));
-	moveBall(distance, slope, mousePos);
 }
 
 function getMousePos(c, event) {
@@ -135,22 +129,35 @@ function erase() {
 	ctx.stroke();
 }
 
-function moveBall(distance, slope, mousePos) {
+function coordinates(event){
+	var mousePos = getMousePos(c, event);
+	// console.log(mousePos.x+", "+mousePos.y);
+	y = mousePos.y - ball.y;
+	x = mousePos.x - ball.x;
+	slope = y/x;
+	console.log(slope);
+	distance = Math.sqrt(Math.pow(y, 2) + Math.pow(x, 2));
+	moveBall(distance, slope, mousePos);
+}
+
+function moveBall(slope) {
 	erase();
 	displacement = ball.speed * 0.1;
-	if (mousePos.x - ball.x >= 0) {
+	if (slope <= 0) {
 		ball.x = ball.x + displacement*Math.cos(Math.atan(slope));
 		ball.y = ball.y + displacement*Math.sin(Math.atan(slope));
 	} else {
 		ball.x = ball.x - displacement*Math.cos(Math.atan(slope));
 		ball.y = ball.y - displacement*Math.sin(Math.atan(slope));
 	}
-	console.log(ball.x+", "+ball.y+", "+distance);
+	// console.log(ball.x+", "+ball.y+", "+distance);
 	render();
-	distance -= displacement;
-	if(distance > 0){
-		setTimeout(function(){moveBall(distance, slope, mousePos)}, 10);
-	}
+	// distance -= displacement;
+	// if(distance > 0){
+		setTimeout(function(){
+			moveBall(slope)
+		}, 10);
+	// }
 }
 
 function movePlayer(event, number) {
@@ -162,4 +169,23 @@ function movePlayer(event, number) {
 		players[number-1].y = mousePos.y;
 	}
 	render();
+	checkHit(number);
+}
+
+function checkAngle(number) {
+	y = (players[number-1].y - ball.y);
+	x = (players[number-1].x - ball.x);
+	slope = x/y;
+	// console.log(-slope);
+	return slope;
+}
+
+function checkHit(number) {
+	distance = Math.sqrt(Math.pow(players[number-1].x - ball.x, 2) + Math.pow(players[number-1].y - ball.y, 2));
+	// console.log(distance);
+	if(distance + radius.offSet >= players[number-1].radius + ball.radius && distance - radius.offSet <= players[number-1].radius + ball.radius){
+		// console.log("yes!!");
+		var slope = checkAngle(number);
+		moveBall(slope);
+	}
 }
