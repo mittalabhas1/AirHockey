@@ -37,7 +37,10 @@ var ball = {
     radius: radius.ball,
     speed_x: 40,
     speed_y: 30,
-    color: '#333'
+    color: '#333',
+    move: 0,
+    hit: false,
+    counter: 0.1
 };
 
 var player1 = {
@@ -141,36 +144,70 @@ function coordinates(event){
 	moveBall(distance, slope, mousePos);
 }
 
-function moveBall(slope, number) {
+function hitBall(slope, number) {
 	erase();
-	displacement_x = ball.speed_x * 0.1;
-	displacement_y = ball.speed_y * 0.1;
-	if (slope <= 0 && players[number-1].x < ball.x) {
-		console.log(1);
-		ball.x = ball.x + displacement_x*Math.cos(Math.atan(slope));
-		ball.y = ball.y - displacement_y*Math.sin(Math.atan(slope));
-	} else if (slope <= 0 && players[number-1].x > ball.x) {
-		console.log(2);
-		ball.x = ball.x - displacement_x*Math.cos(Math.atan(slope));
-		ball.y = ball.y + displacement_y*Math.sin(Math.atan(slope));
-	} else if (slope > 0 && players[number-1].x < ball.x) {
-		console.log(3);
-		ball.x = ball.x + displacement_x*Math.cos(Math.atan(slope));
-		ball.y = ball.y + displacement_y*Math.sin(Math.atan(slope));
-	} else if (slope > 0 && players[number-1].x > ball.x) {
-		console.log(4);
-		ball.x = ball.x - displacement_x*Math.cos(Math.atan(slope));
-		ball.y = ball.y - displacement_y*Math.sin(Math.atan(slope));
+	var displacement = {
+		x: ball.speed_x * ball.counter,
+		y: ball.speed_y * ball.counter
+	};
+	deltaX = displacement.x*Math.cos(Math.atan(slope));
+	deltaY = displacement.y*Math.sin(Math.atan(slope));
+	if (slope <= 0 && players[number-1].x < ball.x && ball.hit) {
+		ball.move = 1;
+		ball.x += deltaX;
+		ball.y -= deltaY;
+	}  else if (slope > 0 && players[number-1].x > ball.x && ball.hit) {
+		ball.move = 2;
+		ball.x -= deltaX;
+		ball.y -= deltaY;
+	} else if (slope <= 0 && players[number-1].x > ball.x && ball.hit) {
+		ball.move = 3;
+		ball.x -= deltaX;
+		ball.y += deltaY;
+	} else if (slope > 0 && players[number-1].x < ball.x && ball.hit) {
+		ball.move = 4;
+		ball.x += deltaX;
+		ball.y += deltaY;
 	}
+	ball.hit = false;
 	checkBoundariesForBall();
 	// console.log(ball.x+", "+ball.y+", "+distance);
 	render();
 	// distance -= displacement;
 	// if(distance > 0){
-		setTimeout(function(){
-			moveBall(slope, number)
-		}, 10);
+		// setTimeout(function(){
+			moveBall(number);
+		// }, 10);
 	// }
+}
+
+function moveBall(number) {
+	erase();
+	var displacement = {
+		x: ball.speed_x * ball.counter,
+		y: ball.speed_y * ball.counter
+	};
+	deltaX = displacement.x*Math.cos(Math.atan(slope));
+	deltaY = displacement.y*Math.sin(Math.atan(slope));
+	if(ball.move == 1){
+		ball.x += deltaX;
+		ball.y -= deltaY;
+	} else if(ball.move == 2){
+		ball.x -= deltaX;
+		ball.y -= deltaY;
+	} else if(ball.move == 3){
+		ball.x -= deltaX;
+		ball.y += deltaY;
+	} else if(ball.move == 4){
+		ball.x += deltaX;
+		ball.y += deltaY;
+	}
+	checkBoundariesForBall();
+	render();
+	checkHit(number);
+	setTimeout(function(){
+		moveBall(number);
+	}, 10);
 }
 
 function checkBoundariesForBall() {
@@ -206,6 +243,7 @@ function checkHit(number) {
 	if(distance + radius.offSet >= players[number-1].radius + ball.radius && distance - radius.offSet <= players[number-1].radius + ball.radius){
 		// console.log("yes!!");
 		var slope = checkAngle(number);
-		moveBall(slope, number);
+		ball.hit = true;
+		hitBall(slope, number);
 	}
 }
