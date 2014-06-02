@@ -1,0 +1,16 @@
+#airHockeyCanvas{
+	border:5px solid #000000;
+}
+#goal{
+	position: absolute;
+	top: 245px;
+	left: 350px;
+	font-size: 30px;
+	display: none;
+}
+#scoreBoard{
+	border: 1px solid #333;
+	box-shadow: #aaa 4px 4px 4px;
+	padding: 20px;
+	display: inline-table;
+}

@@ -3,16 +3,17 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Air Hockey</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-	<canvas id="myCanvas" width="1000" height="500" style="border:5px solid #000000;" onmousemove="movePlayer(event, 1)">
+	<canvas id="airHockeyCanvas" width="1000" height="500" onmousemove="movePlayer(event, 1)">
 		Your browser does not support the HTML5 canvas tag.
 	</canvas>
-	<div id="goal" style="position: absolute;
-				top: 245px;
-				left: 350px;
-				font-size: 30px;
-				display: none;">GOOOAAAAAALLLLL !!!</div>
+	<div id="goal">GOOOAAAAAALLLLL !!!</div>
+
+	<!-- <div id="scoreBoard">
+		Scoreboard
+	</div> -->
 </body>
 <script type="text/javascript" src="script.js"></script>
 </html>
