@@ -1,27 +1,3 @@
-// function CanvasCtrl($scope) {
-	
-// 	var canvas = document.getElementById('myCanvas');
-// 	var context = canvas.getContext('2d');
-
-// 	var point = {
-// 		x: 100,
-// 		y: 100,
-// 		amount: 50
-// 	};
-//     $scope.draw(point);
-
-//     $scope.draw = function(data) {
-//         context.beginPath();
-//         context.arc(data.x, data.y, data.amount, 0, 2 * Math.PI);
-//         context.fillStyle = "#ccddff";
-//         context.fill();
-//         context.lineWidth = 1;
-//         context.strokeStyle = "#666666";
-//         context.stroke();
-//     }
-
-// }
-
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 
@@ -32,22 +8,22 @@ var radius = {
 };
 
 var ball = {
-    x: 500,
-    y: 250,
+    x: c.width/2,
+    y: c.height/2,
     radius: radius.ball,
-    speed_x: 40,
-    speed_y: 30,
-    color: '#333',
+    speed_x: 80,
+    speed_y: 60,
+    color: '#C9E9BD',
     move: 0,
     hit: false,
-    counter: 0.1
+    counter: 0.01
 };
 
 var player1 = {
-    x: 50,
-    y: 250,
+    x: 100,
+    y: c.height/2,
     radius: radius.players,
-    color: '#f00',
+    color: 'white',
     max_x: c.width/2 - radius.players,
     min_x: radius.players,
     max_y: c.height - radius.players,
@@ -55,10 +31,10 @@ var player1 = {
 };
 
 var player2 = {
-    x: 950,
-    y: 250,
+    x: c.width - 100,
+    y: c.height/2,
     radius: radius.players,
-    color: '#00f',
+    color: 'white',
     max_x: c.width - radius.players,
     min_x: c.width/2 + radius.players,
     max_y: c.height - radius.players,
@@ -66,7 +42,8 @@ var player2 = {
 };
 
 var bg = {
-	color: "green"
+	color: "#4F4FFF",
+	base: "#000000"
 };
 
 var players = [];
@@ -80,8 +57,22 @@ function render() {
 	// making the center line
 	ctx.fillStyle = bg.color;
     ctx.fillRect(0, 0, c.width, c.height);
-    ctx.moveTo(500,0);
-	ctx.lineTo(500,500);
+    ctx.moveTo(c.width/2,0);
+	ctx.lineTo(c.width/2,c.height);
+	ctx.stroke();
+
+	//making the big circles
+	ctx.beginPath();
+	ctx.arc(c.width/2,c.height/2,c.height/5,0,2*Math.PI);
+	ctx.strokeStyle = bg.base;
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.arc(10,c.height/2,c.height/5,0,2*Math.PI);
+	ctx.strokeStyle = bg.base;
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.arc(c.width - 10,c.height/2,c.height/5,0,2*Math.PI);
+	ctx.strokeStyle = bg.base;
 	ctx.stroke();
 
 	//making the cue ball
@@ -89,8 +80,13 @@ function render() {
 	ctx.arc(ball.x,ball.y,ball.radius,0,2*Math.PI);
 	ctx.fillStyle = ball.color;
 	ctx.fill();
-	ctx.strokeStyle = bg.color;
+	ctx.strokeStyle = ball.color;
 	ctx.stroke();
+
+	//making goal posts
+	ctx.fillStyle = bg.base;
+	ctx.fillRect(0, 3*c.height/10, 10, 2*c.width/10);
+	ctx.fillRect(c.width - 10, 3*c.height/10, 10, 2*c.width/10);
 
 	//player1
 	ctx.beginPath();
@@ -98,14 +94,18 @@ function render() {
 	ctx.fillStyle = player1.color;
 	ctx.fill();
 	ctx.strokeStyle = player1.color;
+	ctx.arc(player1.x,player1.y,player1.radius/2,0,2*Math.PI);
+	ctx.strokeStyle = "black";
 	ctx.stroke();
 
 	//player2
 	ctx.beginPath();
-	ctx.arc(player2.x,player2.y,player2.radius,0,2*Math.PI);
+	ctx.arc(player2.x,player2.y,player2.radius,-Math.PI,Math.PI);
 	ctx.fillStyle = player2.color;
 	ctx.fill();
 	ctx.strokeStyle = player2.color;
+	ctx.arc(player2.x,player2.y,player2.radius/2,-Math.PI,Math.PI);
+	ctx.strokeStyle = "black";
 	ctx.stroke();
 }
 
@@ -129,7 +129,7 @@ function erase() {
 	ctx.beginPath();
 	ctx.moveTo(500,0);
 	ctx.lineTo(500,500);
-	ctx.strokeStyle = "black";
+	ctx.strokeStyle = bg.base;
 	ctx.stroke();
 }
 
@@ -139,7 +139,7 @@ function coordinates(event){
 	y = mousePos.y - ball.y;
 	x = mousePos.x - ball.x;
 	slope = y/x;
-	console.log(slope);
+	// console.log(slope);
 	distance = Math.sqrt(Math.pow(y, 2) + Math.pow(x, 2));
 	moveBall(distance, slope, mousePos);
 }
@@ -241,9 +241,18 @@ function checkHit(number) {
 	distance = Math.sqrt(Math.pow(players[number-1].x - ball.x, 2) + Math.pow(players[number-1].y - ball.y, 2));
 	// console.log(distance);
 	if(distance + radius.offSet >= players[number-1].radius + ball.radius && distance - radius.offSet <= players[number-1].radius + ball.radius){
+	// if(distance == players[number-1].radius + ball.radius){
 		// console.log("yes!!");
 		var slope = checkAngle(number);
 		ball.hit = true;
 		hitBall(slope, number);
 	}
+}
+
+function goal() {
+	// console.log('goal');
+	document.getElementById('goal').style.display = 'block';
+	setTimeout(function(){
+		document.getElementById('goal').style.display = 'none';
+	}, 3000);
 }
