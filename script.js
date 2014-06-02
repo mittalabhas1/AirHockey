@@ -14,7 +14,7 @@ var ball = {
     speed_x: 80,
     speed_y: 60,
     color: '#C9E9BD',
-    move: 0,
+    move: false,
     hit: false,
     counter: 0.01
 };
@@ -44,6 +44,19 @@ var player2 = {
 var bg = {
 	color: "#4F4FFF",
 	base: "#000000"
+};
+
+var goalPost = {
+	width: 10,
+	posX_1: 0,
+	posX_2: c.width - 10,
+	height: 2*c.height/5,
+	posY: 3*c.height/10
+};
+
+var score = {
+	player1: 0,
+	player2: 0
 };
 
 var players = [];
@@ -85,8 +98,8 @@ function render() {
 
 	//making goal posts
 	ctx.fillStyle = bg.base;
-	ctx.fillRect(0, 3*c.height/10, 10, 2*c.width/10);
-	ctx.fillRect(c.width - 10, 3*c.height/10, 10, 2*c.width/10);
+	ctx.fillRect(goalPost.posX_1, goalPost.posY, goalPost.width, goalPost.height);
+	ctx.fillRect(goalPost.posX_2, goalPost.posY, goalPost.width, goalPost.height);
 
 	//player1
 	ctx.beginPath();
@@ -145,6 +158,8 @@ function coordinates(event){
 }
 
 function hitBall(slope, number) {
+	ball.hit = true;
+	ball.move = true;
 	erase();
 	var displacement = {
 		x: ball.speed_x * ball.counter,
@@ -182,37 +197,45 @@ function hitBall(slope, number) {
 }
 
 function moveBall(number) {
-	erase();
-	var displacement = {
-		x: ball.speed_x * ball.counter,
-		y: ball.speed_y * ball.counter
-	};
-	deltaX = displacement.x*Math.cos(Math.atan(slope));
-	deltaY = displacement.y*Math.sin(Math.atan(slope));
-	if(ball.move == 1){
-		ball.x += deltaX;
-		ball.y -= deltaY;
-	} else if(ball.move == 2){
-		ball.x -= deltaX;
-		ball.y -= deltaY;
-	} else if(ball.move == 3){
-		ball.x -= deltaX;
-		ball.y += deltaY;
-	} else if(ball.move == 4){
-		ball.x += deltaX;
-		ball.y += deltaY;
+	if (ball.move) {
+		erase();
+		var displacement = {
+			x: ball.speed_x * ball.counter,
+			y: ball.speed_y * ball.counter
+		};
+		deltaX = displacement.x*Math.cos(Math.atan(slope));
+		deltaY = displacement.y*Math.sin(Math.atan(slope));
+		if(ball.move == 1){
+			ball.x += deltaX;
+			ball.y -= deltaY;
+		} else if(ball.move == 2){
+			ball.x -= deltaX;
+			ball.y -= deltaY;
+		} else if(ball.move == 3){
+			ball.x -= deltaX;
+			ball.y += deltaY;
+		} else if(ball.move == 4){
+			ball.x += deltaX;
+			ball.y += deltaY;
+		}
+		checkBoundariesForBall();
+		render();
+		checkHit(number);
+		setTimeout(function(){
+			moveBall(number);
+		}, 10);
 	}
-	checkBoundariesForBall();
-	render();
-	checkHit(number);
-	setTimeout(function(){
-		moveBall(number);
-	}, 10);
 }
 
 function checkBoundariesForBall() {
 	if(ball.x > c.width || ball.x < 0)
-		ball.speed_x = -ball.speed_x;
+		if (ball.y > goalPost.posY && ball.y < goalPost.posY + goalPost.height){
+			goal();
+			ball.move = false;
+			ball.x = c.width/2;
+			ball.y = c.height/2;
+		} else
+			ball.speed_x = -ball.speed_x;
 	if(ball.y > c.height || ball.y < 0)
 		ball.speed_y = -ball.speed_y;
 }
@@ -233,7 +256,7 @@ function checkAngle(number) {
 	y = (ball.y - players[number-1].y);
 	x = (ball.y - players[number-1].x);
 	slope = y/x;
-	// console.log(-slope);
+	// console.log(slope);
 	return slope;
 }
 
@@ -241,7 +264,6 @@ function checkHit(number) {
 	distance = Math.sqrt(Math.pow(players[number-1].x - ball.x, 2) + Math.pow(players[number-1].y - ball.y, 2));
 	// console.log(distance);
 	if(distance + radius.offSet >= players[number-1].radius + ball.radius && distance - radius.offSet <= players[number-1].radius + ball.radius){
-	// if(distance == players[number-1].radius + ball.radius){
 		// console.log("yes!!");
 		var slope = checkAngle(number);
 		ball.hit = true;
