@@ -138,7 +138,7 @@ function erase() {
 	ctx.fill();
 	ctx.strokeStyle = bg.color;
 	ctx.stroke();
-	
+
 	ctx.beginPath();
 	ctx.moveTo(500,0);
 	ctx.lineTo(500,500);
@@ -254,7 +254,7 @@ function movePlayer(event, number) {
 
 function checkAngle(number) {
 	y = (ball.y - players[number-1].y);
-	x = (ball.y - players[number-1].x);
+	x = (ball.x - players[number-1].x);
 	slope = y/x;
 	// console.log(slope);
 	return slope;
