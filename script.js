@@ -65,6 +65,12 @@ var players = [];
 players[0] = player1;
 players[1] = player2;
 
+let playerNumber = 1;
+
+const setPlayerNumber = num => {
+	playerNumber = num;
+};
+
 function render() {
 
 	// making the center line
@@ -120,6 +126,9 @@ function render() {
 	ctx.arc(player2.x, player2.y, player2.radius / 2, -Math.PI, Math.PI);
 	ctx.strokeStyle = "black";
 	ctx.stroke();
+
+	checkAllHits();
+	checkBoundariesForBall();
 }
 
 function getMousePos(c, event) {
@@ -157,7 +166,7 @@ function coordinates(event){
 	moveBall(distance, slope, mousePos);
 }
 
-function hitBall(slope, number) {
+function hitBall(slope) {
 	ball.hit = true;
 	ball.move = true;
 	erase();
@@ -167,36 +176,35 @@ function hitBall(slope, number) {
 	};
 	deltaX = displacement.x * Math.cos(Math.atan(slope));
 	deltaY = displacement.y * Math.sin(Math.atan(slope));
-	if (slope <= 0 && players[number-1].x < ball.x && ball.hit) {
+	if (slope <= 0 && players[playerNumber - 1].x < ball.x && ball.hit) {
 		ball.move = 1;
 		ball.x += deltaX;
 		ball.y -= deltaY;
-	}  else if (slope > 0 && players[number-1].x > ball.x && ball.hit) {
+	}  else if (slope > 0 && players[playerNumber - 1].x > ball.x && ball.hit) {
 		ball.move = 2;
 		ball.x -= deltaX;
 		ball.y -= deltaY;
-	} else if (slope <= 0 && players[number-1].x > ball.x && ball.hit) {
+	} else if (slope <= 0 && players[playerNumber - 1].x > ball.x && ball.hit) {
 		ball.move = 3;
 		ball.x -= deltaX;
 		ball.y += deltaY;
-	} else if (slope > 0 && players[number-1].x < ball.x && ball.hit) {
+	} else if (slope > 0 && players[playerNumber - 1].x < ball.x && ball.hit) {
 		ball.move = 4;
 		ball.x += deltaX;
 		ball.y += deltaY;
 	}
 	ball.hit = false;
-	checkBoundariesForBall();
 	// console.log(ball.x+", "+ball.y+", "+distance);
 	render();
 	// distance -= displacement;
 	// if(distance > 0){
 		// setTimeout(function(){
-			moveBall(number);
+			moveBall();
 		// }, 10);
 	// }
 }
 
-function moveBall(number) {
+function moveBall() {
 	if (ball.move) {
 		erase();
 		var displacement = {
@@ -218,12 +226,9 @@ function moveBall(number) {
 			ball.x += deltaX;
 			ball.y += deltaY;
 		}
-		checkBoundariesForBall();
 		render();
-		checkHit(1);
-		checkHit(2);
 		setTimeout(function(){
-			moveBall(number);
+			moveBall();
 		}, 5);
 	}
 }
@@ -242,15 +247,15 @@ function checkBoundariesForBall() {
 }
 
 function movePlayer(event, number) {
+	setPlayerNumber(number);
 	erase();
 	var mousePos = getMousePos(c, event);
 	// console.log(mousePos.x+", "+mousePos.y);
-	if(players[number-1].min_x <= mousePos.x && mousePos.x <= players[number-1].max_x && players[number-1].min_y <= mousePos.y && mousePos.y <= players[number-1].max_y){
-		players[number-1].x = mousePos.x;
-		players[number-1].y = mousePos.y;
+	if(players[playerNumber - 1].min_x <= mousePos.x && mousePos.x <= players[playerNumber - 1].max_x && players[playerNumber - 1].min_y <= mousePos.y && mousePos.y <= players[playerNumber - 1].max_y){
+		players[playerNumber - 1].x = mousePos.x;
+		players[playerNumber - 1].y = mousePos.y;
 	}
 	render();
-	checkHit(number);
 }
 
 function checkAngle(number) {
@@ -271,6 +276,11 @@ function checkHit(number) {
 		hitBall(slope, number);
 	}
 }
+
+const checkAllHits = () => {
+	players.forEach((_p, i) => checkHit(i + 1));
+	checkBoundariesForBall();
+};
 
 function goal() {
 	// console.log('goal');
