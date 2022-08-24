@@ -220,7 +220,8 @@ function moveBall(number) {
 		}
 		checkBoundariesForBall();
 		render();
-		checkHit(number);
+		checkHit(1);
+		checkHit(2);
 		setTimeout(function(){
 			moveBall(number);
 		}, 5);
